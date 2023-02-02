@@ -1,12 +1,12 @@
 import './styles.css';
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Form from './Searchbar';
 import Galery from './ImageGallery';
 import LoadMore from './Button';
 import ModalWindow from './Modal';
 import { ColorRing } from 'react-loader-spinner';
 
-class ImageFinder extends Component {
+const ImageFinder = () => {
   state = {
     // URL: 'https://pixabay.com/api/?q=cat&page=1&key=your_key&image_type=photo&orientation=horizontal&per_page=12',
     baseUrl: 'https://pixabay.com/api/',
@@ -22,24 +22,44 @@ class ImageFinder extends Component {
     status: 'idle',
   };
 
+  const staaatus = {
+  idle,
+  panding,
+  resolved,
+  resolved
+  }
+
+  const [baseUrl, setBaseUrl] = useState('https://pixabay.com/api/');
+  const [key, setKey] = useState('32447292-607f396f27b1a7487e1dc502e');
+  const [imageNameInput, setImageNameInput] = useState('');
+  const [page, setPage] = useState(1);
+  const [per_page, setPer_page] = useState(12);
+  const [images, setImages] = useState(null);
+  const [loadMorePics, setLoadMorePics] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [largeImageUrl, setLargeImageUrl] = useState('idle');
+  const [status, setStatus] = useState('');
+
+
+
   componentDidUpdate(prevState, prevProps) {
     const { baseUrl, key, imageNameInput, page, per_page } = this.state;
     let pageNumber = page;
 
-    if (
-      prevProps.images !== this.state.images ||
-      (prevProps.imageNameInput === this.state.imageNameInput &&
-        this.state.LoadMorePics === false)
-    ) {
-      return;
-    }
-    if (
-      prevProps.imageNameInput &&
-      prevProps.imageNameInput !== this.state.imageNameInput
-    ) {
-      this.setState({ images: [], page: 1, status: 'panding' });
-      pageNumber = 1;
-    }
+    // if (
+    //   prevProps.images !== this.state.images ||
+    //   (prevProps.imageNameInput === this.state.imageNameInput &&
+    //     this.state.LoadMorePics === false)
+    // ) {
+    //   return;
+    // }
+    // if (
+    //   prevProps.imageNameInput &&
+    //   prevProps.imageNameInput !== this.state.imageNameInput
+    // ) {
+    //   this.setState({ images: [], page: 1, status: 'panding' });
+    //   pageNumber = 1;
+    // }
     if (!this.state.images) {
       this.setState({ status: 'panding' });
     }
@@ -78,26 +98,39 @@ class ImageFinder extends Component {
     this.setState({ LoadMorePics: false });
   }
 
-  loadMorePictures = () => {
+    useEffect(() => {
+      let pageNumber = page;
+    const url = `${baseUrl}?q=${imageName}&page=${pageNumber}&key=${key}&image_type=photo&orientation=horizontal&per_page=${per_page}`;
+
+
+      setImages([])
+      setPage(1)
+      setStatus('panding')
+
+      pageNumber = 1;
+    
+  }, [imageNameInput]);
+
+  const loadMorePictures = () => {
     const pageNumber = this.state.page + 1;
     this.setState({ page: pageNumber, LoadMorePics: true });
   };
 
-  getSubmitValue = value => {
+  const getSubmitValue = value => {
     this.setState({ imageNameInput: value });
   };
 
-  openModalWindow = url => {
+  const openModalWindow = url => {
     this.setState({ largeImageUrl: url });
     this.setState({ isModalOpen: true });
   };
 
-  closeModalWindow = () => {
+  const closeModalWindow = () => {
     this.setState({ isModalOpen: false });
   };
 
-  render() {
-    const { images, status, largeImageUrl, isModalOpen } = this.state;
+  // render() {
+    // const { images, status, largeImageUrl, isModalOpen } = this.state;
 
     if (status === 'idle') {
       return (
@@ -158,7 +191,7 @@ class ImageFinder extends Component {
         </div>
       );
     }
-  }
+  // }
 }
 
 export const App = () => {
