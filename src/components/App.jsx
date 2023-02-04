@@ -1,198 +1,158 @@
 import './styles.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import Form from './Searchbar';
 import Galery from './ImageGallery';
 import LoadMore from './Button';
 import ModalWindow from './Modal';
 import { ColorRing } from 'react-loader-spinner';
+import { BrowserRouter } from 'react-router-dom';
+
+const context = createContext();
+export default context;
 
 const ImageFinder = () => {
-  state = {
-    // URL: 'https://pixabay.com/api/?q=cat&page=1&key=your_key&image_type=photo&orientation=horizontal&per_page=12',
-    baseUrl: 'https://pixabay.com/api/',
-    key: '32447292-607f396f27b1a7487e1dc502e',
-    imageNameInput: '',
-    page: 1,
-    per_page: 12,
-    images: null,
-
-    LoadMorePics: false,
-    isModalOpen: false,
-    largeImageUrl: '',
-    status: 'idle',
-  };
-
-  const staaatus = {
-  idle,
-  panding,
-  resolved,
-  resolved
-  }
-
+  // console.log(context);
   const [baseUrl, setBaseUrl] = useState('https://pixabay.com/api/');
   const [key, setKey] = useState('32447292-607f396f27b1a7487e1dc502e');
   const [imageNameInput, setImageNameInput] = useState('');
   const [page, setPage] = useState(1);
   const [per_page, setPer_page] = useState(12);
   const [images, setImages] = useState(null);
-  const [loadMorePics, setLoadMorePics] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [largeImageUrl, setLargeImageUrl] = useState('idle');
-  const [status, setStatus] = useState('');
+  const [largeImageUrl, setLargeImageUrl] = useState('');
+  const [status, setStatus] = useState('idle');
+  let pageNumber = page;
 
-
-
-  componentDidUpdate(prevState, prevProps) {
-    const { baseUrl, key, imageNameInput, page, per_page } = this.state;
-    let pageNumber = page;
-
-    // if (
-    //   prevProps.images !== this.state.images ||
-    //   (prevProps.imageNameInput === this.state.imageNameInput &&
-    //     this.state.LoadMorePics === false)
-    // ) {
-    //   return;
-    // }
-    // if (
-    //   prevProps.imageNameInput &&
-    //   prevProps.imageNameInput !== this.state.imageNameInput
-    // ) {
-    //   this.setState({ images: [], page: 1, status: 'panding' });
-    //   pageNumber = 1;
-    // }
-    if (!this.state.images) {
-      this.setState({ status: 'panding' });
-    }
-
+  const fetchUrl = () => {
     const imageName = imageNameInput.trim();
-    if (!imageName) {
-      alert('Введіть назву картинки');
-      this.setState({ status: 'idle' });
-      return;
-    }
-    const url = `${baseUrl}?q=${imageName}&page=${pageNumber}&key=${key}&image_type=photo&orientation=horizontal&per_page=${per_page}`;
 
-    fetch(url)
+    const url = `${baseUrl}?q=${imageName}&page=${pageNumber}&key=${key}&image_type=photo&orientation=horizontal&per_page=${per_page}`;
+    return fetch(url)
       .then(response => {
         return response.json();
       })
-      .then(data => {
+      .catch(error => console.log(error));
+  };
+
+  useEffect(() => {
+    setImages([]);
+    setPage(1);
+    pageNumber = 1;
+
+    if (imageNameInput) {
+      setStatus('panding');
+      fetchUrl().then(data => {
         const imageArray = data.hits;
 
-        this.state.images
-          ? this.setState({ images: [...this.state.images, ...imageArray] })
-          : this.setState({ images: imageArray });
+        setImages(imageArray);
 
         if (imageArray.length === 0) {
-          alert(` Забражень з назвою ${this.state.imageNameInput}не знайдено`);
-          this.setState({ status: 'idle' });
+          alert(` Забражень з назвою ${imageNameInput}не знайдено`);
+          setStatus('idle');
           return;
         }
-        if (imageArray.length < 12) {
-          this.setState({ status: 'resolvedAllPic' });
-          return;
-        }
-        this.setState({ status: 'resolved' });
-      })
-      .catch(error => console.log(error));
-    this.setState({ LoadMorePics: false });
-  }
-
-    useEffect(() => {
-      let pageNumber = page;
-    const url = `${baseUrl}?q=${imageName}&page=${pageNumber}&key=${key}&image_type=photo&orientation=horizontal&per_page=${per_page}`;
-
-
-      setImages([])
-      setPage(1)
-      setStatus('panding')
-
-      pageNumber = 1;
-    
+        setPage(2);
+        setStatus('resolved');
+      });
+    }
   }, [imageNameInput]);
 
   const loadMorePictures = () => {
-    const pageNumber = this.state.page + 1;
-    this.setState({ page: pageNumber, LoadMorePics: true });
+    const pageNumber = page + 1;
+    setPage(pageNumber);
+    fetchUrl().then(data => {
+      const imageArray = data.hits;
+
+      if (imageArray.length < 12) {
+        setStatus('resolvedAllPic');
+      }
+
+      setImages([...images, ...imageArray]);
+    });
   };
 
   const getSubmitValue = value => {
-    this.setState({ imageNameInput: value });
+    setImageNameInput(value);
   };
 
   const openModalWindow = url => {
-    this.setState({ largeImageUrl: url });
-    this.setState({ isModalOpen: true });
+    setLargeImageUrl(url);
+    setIsModalOpen(true);
   };
 
   const closeModalWindow = () => {
-    this.setState({ isModalOpen: false });
+    setIsModalOpen(false);
   };
 
-  // render() {
-    // const { images, status, largeImageUrl, isModalOpen } = this.state;
+  //render
+  if (status === 'idle') {
+    return (
+      <div className="image-box">
+        <Form onSubmit={getSubmitValue} />
+      </div>
+    );
+  }
 
-    if (status === 'idle') {
-      return (
-        <div className="image-box">
-          <Form onSubmit={this.getSubmitValue} />
+  if (status === 'resolved') {
+    return (
+      <div className="image-box">
+        <Form onSubmit={getSubmitValue} />
+        <div className="box">
+          <BrowserRouter>
+            <context.Provider value={{ images, openModalWindow }}>
+              <Galery />
+            </context.Provider>
+          </BrowserRouter>
+          <LoadMore morePictures={loadMorePictures} />
         </div>
-      );
-    }
-
-    if (status === 'resolved') {
-      return (
-        <div className="image-box">
-          <Form onSubmit={this.getSubmitValue} />
-          <div className="box">
-            <Galery image={images} largePic={this.openModalWindow} />
-            <LoadMore morePictures={this.loadMorePictures} />
-          </div>
-          {isModalOpen && (
-            <ModalWindow
-              largeImage={largeImageUrl}
-              closeModal={this.closeModalWindow}
-              keyDown={this.keyDown}
-            />
-          )}
-        </div>
-      );
-    }
-
-    if (status === 'resolvedAllPic') {
-      return (
-        <div className="image-box">
-          <Form onSubmit={this.getSubmitValue} />
-          <div>
-            <Galery image={images} largePic={this.openModalWindow} />
-          </div>
-          {isModalOpen && (
-            <ModalWindow
-              largeImage={largeImageUrl}
-              closeModal={this.closeModalWindow}
-            />
-          )}
-        </div>
-      );
-    }
-    if (status === 'panding') {
-      return (
-        <div className="image-box">
-          <Form onSubmit={this.getSubmitValue} />
-          <ColorRing
-            visible={true}
-            height="80"
-            width="80"
-            ariaLabel="blocks-loading"
-            wrapperStyle={{}}
-            wrapperClass="blocks-wrapper"
-            colors={['#b8c480', '#B2A3B5', '#F4442E', '#51E5FF', '#429EA6']}
+        {isModalOpen && (
+          <ModalWindow
+            largeImage={largeImageUrl}
+            closeModal={closeModalWindow}
+            // keyDown={keyDown}
           />
+        )}
+      </div>
+    );
+  }
+
+  if (status === 'resolvedAllPic') {
+    return (
+      <div className="image-box">
+        <Form onSubmit={getSubmitValue} />
+        <div>
+          <BrowserRouter>
+            <context.Provider value={{ images, openModalWindow }}>
+              <Galery />
+            </context.Provider>
+          </BrowserRouter>
         </div>
-      );
-    }
-  // }
-}
+        {isModalOpen && (
+          <ModalWindow
+            largeImage={largeImageUrl}
+            closeModal={closeModalWindow}
+          />
+        )}
+      </div>
+    );
+  }
+  if (status === 'panding') {
+    return (
+      <div className="image-box">
+        <Form onSubmit={getSubmitValue} />
+        <ColorRing
+          visible={true}
+          height="80"
+          width="80"
+          ariaLabel="blocks-loading"
+          wrapperStyle={{}}
+          wrapperClass="blocks-wrapper"
+          colors={['#b8c480', '#B2A3B5', '#F4442E', '#51E5FF', '#429EA6']}
+        />
+      </div>
+    );
+  }
+};
 
 export const App = () => {
   return <div>{<ImageFinder />}</div>;

@@ -1,6 +1,8 @@
-const { Component } = require('react');
+import { useState, useEffect } from 'react';
 
-const Form = () => {
+// const { Component } = require('react');
+
+const Form = ({ onSubmit }) => {
   // state = {
   //   imageNameInput: '',
   // };
@@ -9,19 +11,21 @@ const Form = () => {
 
   const inputChange = el => {
     const { value } = el.currentTarget;
-    this.setState({ imageNameInput: value });
+    // this.setState({ imageNameInput: value });
+    setImageNameInput(value);
+    // console.log(value);
   };
 
   const handleSubmit = el => {
     el.preventDefault();
 
-    this.props.onSubmit(this.state.imageNameInput);
+    onSubmit(imageNameInput);
   };
 
   // render() {
   return (
     <header className="searchbar">
-      <form className="searchForm" onSubmit={this.handleSubmit}>
+      <form className="searchForm" onSubmit={handleSubmit}>
         <button type="submit" className="searchForm-button">
           <span className="button-label">Search</span>
         </button>
@@ -32,8 +36,8 @@ const Form = () => {
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          value={this.state.imageName}
-          onChange={this.inputChange}
+          // value={imageName}
+          onChange={inputChange}
         />
       </form>
     </header>

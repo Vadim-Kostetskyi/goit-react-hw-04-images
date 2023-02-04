@@ -1,9 +1,9 @@
 import GalleryItem from './ImageGalleryItem';
 
-const Galery = ({ ...props }) => {
+const Galery = () => {
   return (
     <ul className="imageGallery">
-      <GalleryItem {...props} />
+      <GalleryItem />
     </ul>
   );
 };

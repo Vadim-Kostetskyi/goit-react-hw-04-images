@@ -1,30 +1,34 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 
-class ModalWindow extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.hendleKeyDown);
-  }
+const ModalWindow = ({ closeModal, largeImage }) => {
+  //  componentDidMount() {
+  //   window.addEventListener('keydown', this.hendleKeyDown);
+  // }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.hendleKeyDown);
-  }
+  // componentWillUnmount() {
+  //   window.removeEventListener('keydown', this.hendleKeyDown);
+  // }
+  useEffect(() => {
+    window.addEventListener('keydown', hendleKeyDown);
+    return () => window.removeEventListener('keydown', hendleKeyDown);
+  }, []);
 
-  hendleKeyDown = ev => {
+  const hendleKeyDown = ev => {
     if (ev.code === 'Escape') {
-      this.props.closeModal();
+      closeModal();
     }
   };
 
-  render() {
-    const { closeModal, largeImage } = this.props;
-    return (
-      <div className="overlay" onClick={() => closeModal()}>
-        <div className="modal">
-          <img src={largeImage} alt="" />
-        </div>
+  // render() {
+  // const { closeModal, largeImage } = this.props;
+  return (
+    <div className="overlay" onClick={() => closeModal()}>
+      <div className="modal">
+        <img src={largeImage} alt="" />
       </div>
-    );
-  }
-}
+    </div>
+  );
+  // }
+};
 
 export default ModalWindow;
