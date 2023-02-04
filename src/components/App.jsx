@@ -12,11 +12,11 @@ export default context;
 
 const ImageFinder = () => {
   // console.log(context);
-  const [baseUrl, setBaseUrl] = useState('https://pixabay.com/api/');
-  const [key, setKey] = useState('32447292-607f396f27b1a7487e1dc502e');
+  const baseUrl = 'https://pixabay.com/api/';
+  const key = '32447292-607f396f27b1a7487e1dc502e';
   const [imageNameInput, setImageNameInput] = useState('');
   const [page, setPage] = useState(1);
-  const [per_page, setPer_page] = useState(12);
+  const per_page = 12;
   const [images, setImages] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [largeImageUrl, setLargeImageUrl] = useState('');
